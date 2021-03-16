@@ -1,44 +1,24 @@
 <?php
-include('./config/CDb.php');
-$db = new CDb;
-$id =    $db->Insert("Insert into `frm_empresa`(
-           `rfc` , `razon_social`, `usuario_creacion`,  `fecha_creacion`, `usuario_modificacion`, `fecha_modificacion`) values
-           ( :rfc , :razon_social, :usuario_creacion, :fecha_creacion, :usuario_modificacion, :fecha_modificacion )", [
-             'rfc' => 'AAAA',
-             'razon_social' => 'Hola',
-             'usuario_creacion'=>'Admin',
-             'fecha_creacion'=>'2021-03-10',
-             'usuario_modificacion'=>' ',
-             'fecha_modificacion'=>'2021-03-10'
-    ]);
+include('Form.php');
 
-/* $db->Insert("Insert into `frm_empresa`
-                ( `rfc`,`razon_social`,`nombre_comercial`,`direccion`,`estado`,`usuario_creacion`,`fecha_creacion`, `usuario_modificacion`, `fecha_modificacion`)
-                       values
-                       (`:rfc`,
-                        `:razon_social`,
-                         `:nombre_comercial`,
-                         `:direccion`,
-                         `:estado`,
-                         `:usuario_creacion`,
-                         `:fecha_creacion`,
-                         `:usuario_modificacion`,
-                         `:fecha_modificacion`)",
-                         [
-                           'rfc' => ':rfcAAA',
-                           'razon_social' =>'Hola',
-                           'nombre_comercial' => 'Papeleria ZACARIAS',
-                           'direccion' =>'No',
-                           'estado' => 1,
-                           'usuario_creacion' => 'admin',
-                           'fecha_creacion' => '2016-03-06 19:49:34',
-                           'usuario_modificacion' => 'admin',
-                           'fecha_modificacion' => '2016-03-06 19:49:41'
-                         ]); */
+/**
+ * Tratamiento de las peticiones de metodos http seguros, permitiendo metodos idempotentes
+ */
+define('ALLOWEDMETHODS', ['PUT', 'PATCH', 'POST', "GET", "UPDATE"]);
+$is_nginx = strpos(strtoupper($_SERVER['SERVER_SOFTWARE']), 'NGINX') !== false;
 
-print_r(["id "=>$id]);
-print_r($db->Select("Select * from frm_empresa"));
-
+if(!function_exists('apache_request_headers') || $is_nginx)
+{
+    /**
+     * Tratamiento de las peticiones de metodos http seguros, permitiendo metodos idempotentes
+     */
+    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        if (in_array($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'], ALLOWEDMETHODS)) {
+            $_SERVER['REQUEST_METHOD'] = $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'];
+        }
+    }
+    
+}
 ?>
 
 <!DOCTYPE html>
@@ -50,9 +30,63 @@ print_r($db->Select("Select * from frm_empresa"));
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
+#assistant {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#assistant td, #assistant th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#assistant tr:nth-child(even){background-color: #f2f2f2;}
+
+#assistant tr:hover {background-color: #ddd;}
+
+#assistant th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #181918;
+  color: white;
+}
+
+.alert {
+  padding: 20px;
+  background-color: #f44336;
+  color: white;
+  opacity: 1;
+  transition: opacity 0.6s;
+  margin-bottom: 15px;
+}
+
+.alert.success {background-color: #4CAF50;}
+.alert.info {background-color: #2196F3;}
+.alert.warning {background-color: #ff9800;}
+
+.closebtn {
+  margin-left: 15px;
+  color: white;
+  font-weight: bold;
+  float: right;
+  font-size: 22px;
+  line-height: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.closebtn:hover {
+  color: black;
+}
 body {font-family: "Lato", sans-serif}
 .mySlides {display: none}
+
+
 </style>
+
+
 <body>
 
 <!-- Navbar -->
@@ -62,6 +96,7 @@ body {font-family: "Lato", sans-serif}
     <a href="#" class="w3-bar-item w3-button w3-padding-large">HOME</a>
     <a href="#about" class="w3-bar-item w3-button w3-padding-large w3-hide-small">ABOUT US</a>
     <a href="#register" class="w3-bar-item w3-button w3-padding-large w3-hide-small">REGISTER</a>
+    <a href="#assistant_list" class="w3-bar-item w3-button w3-padding-large w3-hide-small">ASSISTANTS LIST</a>
     <a href="javascript:void(0)" class="w3-padding-large w3-hover-red w3-hide-small w3-right"><i class="fa fa-search"></i></a>
   </div>
 </div>
@@ -70,6 +105,7 @@ body {font-family: "Lato", sans-serif}
 <div id="navDemo" class="w3-bar-block w3-black w3-hide w3-hide-large w3-hide-medium w3-top" style="margin-top:46px">
   <a href="#about" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">ABOUT US</a>
   <a href="#register" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">REGISTER</a>
+  <a href="#assistant_list" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">ASSISTANTS LIST</a>
   <a href="#" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">MERCH</a>
 </div>
 
@@ -120,6 +156,7 @@ body {font-family: "Lato", sans-serif}
   <!-- The Register Section -->
   <div class="w3-container w3-content w3-padding-64" style="max-width:800px" id="register">
     <h2 class="w3-wide w3-center">REGISTER</h2>
+    
     <p class="w3-opacity w3-center"><i>Event is free, enjoy your moment.!</i></p>
     <div class="w3-row w3-padding-32">
       <div class="w3-col m6 w3-large w3-margin-bottom">
@@ -129,68 +166,105 @@ body {font-family: "Lato", sans-serif}
       </div>
       <div class="w3-col m6">
 
-        <form id="testForm">
+        <form id="testForm" method="post">
           <div class="w3-row-padding" style="margin:0 -16px 8px -16px">
             <div class="w3-half">
-              <input class="w3-input w3-border" type="text" placeholder="Name" required name="Name">
+              <input class="w3-input w3-border" type="text" placeholder="name" required name="Name">
             </div>
             <div class="w3-half">
-              <input class="w3-input w3-border" type="text" placeholder="Last Name" required name="LastName">
+              <input class="w3-input w3-border" type="text" placeholder="Last Name" required name="last_name">
             </div>
 
           </div>
           <div class="w3-row-padding" style="margin:0 -16px 8px -16px">
             <div class="w3-half">
-              <input class="w3-input w3-border" type="text" placeholder="How old are you?" required name="Years">
+              <input class="w3-input w3-border" type="number" placeholder="How old are you?" required name="years">
             </div>
             <div class="w3-half">
-              <select class="w3-input w3-border" name="Country" id="Country" value="0">
+              <select class="w3-input w3-border" name="iddef_musical_genre" id="gener" value="0">
                 <option value="0">Favorite genre?</option>
-                <option value="saab">Salas</option>
-                <option value="opel">Rock</option>
-                <option value="audi">Metal</option>
+                <?php
+                $data = $db->Select("SELECT * from def_musical_genre");
+                foreach ($data as $valores):
+                    echo '<option value="'.$valores["iddef_musical_genre"].'">'.$valores["name"].'</option>';
+                endforeach;
+                ?>
+        
               </select>
             </div>
           </div>
           <div class="w3-row-padding" style="margin:0 -16px 8px -16px">
             <div class="w3-large">
-              <input class="w3-input w3-border" type="text" placeholder="Type your Favorite Music genre" required name="Other_genre">
+              <input class="w3-input w3-border" type="text" placeholder="(*Other) Type your Favorite Music genre" required name="other_music">
             </div>
           </div>
           <div class="w3-row-padding" style="margin:0 -16px 8px -16px">
             <div class="w3-large">
-              <input class="w3-input w3-border" type="text" placeholder="Favorite Band or Singer?" required name="Other_genre">
+              <input class="w3-input w3-border" type="text" placeholder="Favorite Band or Singer?" required name="favorite_singer">
             </div>
           </div>
           <div class="w3-row-padding" style="margin:0 -16px 8px -16px">
             <div class="w3-large">
-              <input class="w3-input w3-border" type="email" placeholder="Email" required name="Message">
+              <input class="w3-input w3-border" type="email" placeholder="Email" required  name="email">
             </div>
           </div>
           <div class="w3-row-padding" style="margin:0 -16px 8px -16px">
             <div class="w3-large">
-              <select class="w3-input w3-border" name="Country" id="Country" value="0">
+              <select class="w3-input w3-border" name="iddef_county" id="Country" value="0">
                 <option value="0">From which country you visit us?</option>
-                <option value="saab">Saab</option>
-                <option value="opel">Opel</option>
-                <option value="audi">Audi</option>
+                <?php
+                $data = $db->Select("SELECT * from def_country");
+                foreach ($data as $valores):
+                    echo '<option value="'.$valores["iddef_county"].'">'.$valores["name"].'</option>';
+                endforeach;
+                ?>
               </select>
             </div>
           </div>
 
-
           <div class="w3-row-padding" style="margin:0 -16px 8px -16px">
             <div class="w3-large">
-              <input class="w3-input w3-border" type="text" placeholder="Message" required name="Message">
+              <input class="w3-input w3-border" type="text" placeholder="Message" required name="note">
             </div>
           </div>
         </form>
-          <button class="w3-button w3-black w3-section w3-right" onclick="postStuff()" >SEND</button>
+          <button class="w3-button w3-black w3-section w3-right" onclick="send_req('event_resgister')" >SEND</button>
       </div>
     </div>
   </div>
-
-<!-- End Page Content -->
+  
+  
+  <div class="w3-container w3-content w3-center w3-padding-64" style="max-width:800px" id="assistant_list">
+    <h2 class="w3-wide">ASSISTANT LIST </h2>
+    <p class="w3-opacity"><i>Enjoy Music.!</i></p>
+    <table id="assistant">
+        <tr>
+            <?php
+            $data_assistant = $db->Select("SELECT name, last_name, years, note  from event_resgister");
+            $header = array_keys($data_assistant[0]);
+            foreach ($header as $valores):
+                echo '<th>'.$valores.'</th>';
+            endforeach;
+            ?>
+        </tr>
+            <?php
+            
+            foreach ($data_assistant as $valores){
+                echo '<tr>';
+                foreach ($valores as $_row):
+                    echo '<td>'.$_row.'</td>';
+                endforeach;
+                echo '<tr>';
+            }
+            
+            ?>
+    </table>
+  </div>
+  
+  
+  
+  
+ <!-- End Page Content -->
 </div>
 
 <!-- Image of location/map -->
@@ -206,9 +280,11 @@ body {font-family: "Lato", sans-serif}
   <i class="fa fa-linkedin w3-hover-opacity"></i>
 </footer>
 
+
 <script>
 // Automatic Slideshow - change image every 4 seconds
 var myIndex = 0;
+const url_base = window.location.origin;
 carousel();
 
 function carousel() {
@@ -234,34 +310,53 @@ function myFunction() {
 }
 
 
-function postStuff(){
-// Create our XMLHttpRequest object
-var hr = new XMLHttpRequest();
-// Create some variables we need to send to our PHP file
-// var url = "processForm.php";
-var form = document.querySe('testForm');
-var data = new FormData(form);
+function send_req(table){
+    const form = document.querySelector('form');
+    var data = getDataElementsForm(form, false);
+    data.table = table;
 
-console.log(data);
-var req = new XMLHttpRequest();
-// req.send(data);
-/*var fn = document.getElementById("fname").value;
-var ln = document.getElementById("lname").value;
-var vars = "firstname="+fn+"&lastname="+ln;
-hr.open("POST", url, true);
-hr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-// Access the onreadystatechange event for the XMLHttpRequest object
-hr.onreadystatechange = function() {
-    if(hr.readyState == 4 && hr.status == 200) {
-        var return_data = hr.responseText;
-        document.getElementById("status").innerHTML = return_data;
-    }
-}
-// Send the data to PHP now... and wait for response to update the status div
-hr.send(vars); // Actually execute the request
-document.getElementById("status").innerHTML = "processing..."; */
-}
+    var xml = new XMLHttpRequest();
+    xml.onreadystatechange = function() {
+        if( xml.readyState==4 && xml.status==200 ){
+            alert("Successful registration");
+        }
+    };
 
+    xml.open("POST", "Form.php", false);
+    xml.setRequestHeader("Content-type", "application/json");
+    xml.send(JSON.stringify(data));
+}
+/**
+	* @author Manuel Vicente <manuel_vicente@outlook.com>
+	* Funcion para obtener los valores de los elementos de un formulario
+	* @param Object form. instancia del formualrio a enviar | !importante: el formulario definido
+	* @param Boolean string. para retornar un STRING || JSON (default STRING)
+	* @return STRING || JSON
+	*/
+	function getDataElementsForm(form, string) {
+		var elements, element, value, json = {};
+		elements = form.elements;
+		for (var i = 0; i < elements.length; i++) {
+			element = elements[i];
+			if (element.name) {
+				if (element.nodeName == 'INPUT' && element.type == 'radio') {
+					var options = document.getElementsByName(element.name);
+					for (var j = 0; j < options.length; j++) {
+						if (options[j].checked) {
+							value = options[j].value;
+						}
+					}
+				} else if (element.nodeName == 'INPUT' && element.type == 'checkbox') {
+					value = element.checked ? 1 : 0;
+				} else {
+					value = element.value;
+				}
+
+				json[element.name] = value;
+			}
+		}
+		return string === undefined || string ? JSON.stringify(json) : json;
+	}
 </script>
 
 </body>

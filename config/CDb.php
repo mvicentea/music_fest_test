@@ -13,9 +13,9 @@ class CDb {
   public function __construct(){
     $this->host='localhost';
     $this->port='3306';
-    $this->dbname= 'puntodeventa';
+    $this->dbname= 'music_festival';
     $this->username = 'root';
-    $this->password = '9un70v34t4';
+    $this->password = 'Key%add+2001$';
     $this->connection = new CDbConnection($this->host.":". $this->port, $this->dbname, $this->username, $this->password);
     return $this->connection;
   }
